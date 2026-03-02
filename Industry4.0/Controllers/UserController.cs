@@ -172,5 +172,39 @@ namespace Industry4._0.Controllers
 
 
 
+
+
+        [HttpGet("active")]
+        public IActionResult GetActiveUsers()
+        {
+            var activeUsers = _context.AppUsers
+                .Where(u => u.IsActive)
+                .Select(u => new
+                {
+                    u.Id,
+                    u.EmployeeId,
+                    u.Role,
+                    u.IsActive
+                })
+                .ToList();
+
+            if (!activeUsers.Any())
+            {
+                return NotFound(new
+                {
+                    Status = false,
+                    Message = "No active users found"
+                });
+            }
+
+            return Ok(new
+            {
+                Status = true,
+                Count = activeUsers.Count,
+                Data = activeUsers
+            });
+        }
+
+
     }
 }
