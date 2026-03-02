@@ -2,13 +2,11 @@
 
 namespace Industry4._0.Entities
 {
-    public class AppUser
+    public class UserAuthDelails
     {
         [Key]
-        public int Id { get; set; }
+        public int ID { get; set; }
         public string EmployeeId { get; set; }
-        
-        public string Role { get; set; }
-        public bool IsActive { get; set; }
+        public string Password { get; set; }
     }
 }

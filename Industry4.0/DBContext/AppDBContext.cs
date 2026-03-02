@@ -12,8 +12,10 @@ namespace Industry4._0.DBContext
         public DbSet<Machine> Machines { get; set; }
         public DbSet<ProductionEntry> ProductionEntries { get; set; }
         public DbSet<Shift> Shifts { get; set; }
-
+        public DbSet<UserAuthDelails> UserAuthDelails
+        {
+            get; set;
+        }
     }
-}
-        
+}  
     
