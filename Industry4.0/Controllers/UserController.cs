@@ -65,48 +65,112 @@ namespace Industry4._0.Controllers
 
 
 
-
         [HttpPost("register")]
         public IActionResult Register(RegisterUserModel user)
         {
-            
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var existing = _context.AppUsers
                 .FirstOrDefault(x => x.EmployeeId == user.EmployeeId);
 
             if (existing != null)
             {
-                return BadRequest("User already exists");
+                return BadRequest(new
+                {
+                    Status = false,
+                    Message = "User already exists"
+                });
             }
 
-            
             var newUser = new AppUser
             {
-                EmployeeId = user.EmployeeId, 
+                EmployeeId = user.EmployeeId,
                 Role = user.Role,
                 IsActive = true
             };
 
             var hasher = new PasswordHasher<AppUser>();
 
-
-            var aut = new UserAuthDelails
+            var auth = new UserAuthDelails
             {
-                EmployeeId = user.EmployeeId
+                EmployeeId = user.EmployeeId,
+                Password = hasher.HashPassword(newUser, user.Password)
             };
-            aut.Password = hasher.HashPassword(newUser, user.Password);
-
-
-
 
             _context.AppUsers.Add(newUser);
-
-            _context.UserAuthDelails.Add(aut);
-
-
+            _context.UserAuthDelails.Add(auth);
             _context.SaveChanges();
 
-            return Created(nameof(Get), user);
+            return CreatedAtAction(
+                nameof(Get),
+                new { employeeId = newUser.EmployeeId },
+                new
+                {
+                    Status = true,
+                    Message = "User registered successfully",
+                    Data = new
+                    {
+                        newUser.Id,
+                        newUser.EmployeeId,
+                        newUser.Role,
+                        newUser.IsActive
+                    }
+                });
         }
+
+
+
+        [HttpPost("login")]
+        public IActionResult Login(LoginModel model)
+        {
+            
+            var user = _context.AppUsers
+                .FirstOrDefault(x => x.EmployeeId == model.EmployeeId);
+
+            if (user == null)
+            {
+                return Unauthorized("Invalid Employee ID or Password");
+            }
+
+            if (!user.IsActive)
+            {
+                return Unauthorized("User is inactive");
+            }
+
+            
+            var auth = _context.UserAuthDelails
+                .FirstOrDefault(x => x.EmployeeId == model.EmployeeId);
+
+            if (auth == null)
+            {
+                return Unauthorized("Authentication details not found");
+            }
+
+            
+            var hasher = new PasswordHasher<AppUser>();
+
+            var result = hasher.VerifyHashedPassword(
+                user,
+                auth.Password,
+                model.Password
+            );
+
+            if (result == PasswordVerificationResult.Failed)
+            {
+                return Unauthorized("Invalid Employee ID or Password");
+            }
+
+            
+            return Ok(new
+            {
+                Message = "Login successful",
+                user.EmployeeId,
+                user.Role
+            });
+        }
+
+
 
     }
 }
