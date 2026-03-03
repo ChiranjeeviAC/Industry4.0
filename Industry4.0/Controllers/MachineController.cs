@@ -2,6 +2,7 @@
 using Industry4._0.Entities;
 using Industry4._0.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.NetworkInformation;
 
 namespace Industry4._0.Controllers
 {
@@ -125,9 +126,38 @@ namespace Industry4._0.Controllers
             });
         }
 
+        //To Deactivate Machine
+        [HttpPost("DeactivateMachine")]
+        public IActionResult DeactivateMachine(int id)
+        {
+            var machine = _context.Machines.Where(m => m.Id == id).FirstOrDefault();
+            if (machine == null) return BadRequest(new
+            {
+                Status = false,
+                Message = "Machine Not Found."
+            });
+            if (!machine.IsActive) return BadRequest(new
+            {
+                Status = false,
+                Message = "Machine already deactivated."
+            });
+
+
+            machine.IsActive = false;
+            _context.SaveChanges();
+            return Ok(new
+            {
+                Status = true,
+                Message = "Machine get deactivated.",
+                Data = machine
+            });
+        }
 
         
 
 
+
     }
+
+
 }
