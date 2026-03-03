@@ -206,5 +206,47 @@ namespace Industry4._0.Controllers
         }
 
 
+        [HttpPut("C/{employeeId}")]
+        public IActionResult DeactivateUser(string employeeId)
+        {
+            var user = _context.AppUsers
+                .FirstOrDefault(u => u.EmployeeId == employeeId);
+
+            if (user == null)
+            {
+                return NotFound(new
+                {
+                    Status = false,
+                    Message = "User not found"
+                });
+            }
+
+            if (!user.IsActive)
+            {
+                return BadRequest(new
+                {
+                    Status = false,
+                    Message = "User is already inactive"
+                });
+            }
+
+            user.IsActive = false;
+
+            _context.SaveChanges();
+
+            return Ok(new
+            {
+                Status = true,
+                Message = "User deactivated successfully",
+                Data = new
+                {
+                    user.EmployeeId,
+                    user.Role,
+                    user.IsActive
+                }
+            });
+        }
+
+
     }
 }
