@@ -94,6 +94,40 @@ namespace Industry4._0.Controllers
             return Ok(machine);
         }
 
-       
+
+        [HttpGet("GetAllActiveMachine")]
+        public IActionResult GetAllActiveMachine()
+        {
+            var machines = _context.Machines
+                .Where(i => i.IsActive )
+                .Select(i => new
+                {
+                    i.Id,
+                    i.MachineCode,
+                    i.MachineName,
+
+                }).ToList();
+
+            if( machines.Count == 0)
+            {
+                return NotFound(
+                    new
+                    {
+                        Status = false,
+                        Message = "No Active Machine found"
+                    });
+            }
+            return Ok(new
+            {
+                Status = true,
+                Message = $"Number of Active Machine are {machines.Count}",
+                Data = machines
+            });
+        }
+
+
+        
+
+
     }
 }
