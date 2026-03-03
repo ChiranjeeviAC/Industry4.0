@@ -206,11 +206,11 @@ namespace Industry4._0.Controllers
         }
 
 
-        [HttpPut("C/{employeeId}")]
-        public IActionResult DeactivateUser(string employeeId)
+        [HttpPatch]
+        public IActionResult ToChangeRoleOrToDeactivateUser(UpdateUserDto dto)
         {
             var user = _context.AppUsers
-                .FirstOrDefault(u => u.EmployeeId == employeeId);
+                .FirstOrDefault(u => u.EmployeeId == dto.EmployeeId);
 
             if (user == null)
             {
@@ -220,32 +220,20 @@ namespace Industry4._0.Controllers
                     Message = "User not found"
                 });
             }
+            user.Role = dto.Role;
 
-            if (!user.IsActive)
-            {
-                return BadRequest(new
-                {
-                    Status = false,
-                    Message = "User is already inactive"
-                });
-            }
-
-            user.IsActive = false;
-
+            user.IsActive = dto.IsActive;
             _context.SaveChanges();
 
             return Ok(new
             {
                 Status = true,
-                Message = "User deactivated successfully",
-                Data = new
-                {
-                    user.EmployeeId,
-                    user.Role,
-                    user.IsActive
-                }
+                Message = "User Updated successfully",
+                Data = user
             });
         }
+
+        
 
         [HttpDelete]
 
