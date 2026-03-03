@@ -124,7 +124,7 @@ namespace Industry4._0.Controllers
         [HttpPost("login")]
         public IActionResult Login(LoginModel model)
         {
-            
+
             var user = _context.AppUsers
                 .FirstOrDefault(x => x.EmployeeId == model.EmployeeId);
 
@@ -138,7 +138,7 @@ namespace Industry4._0.Controllers
                 return Unauthorized("User is inactive");
             }
 
-            
+
             var auth = _context.UserAuthDelails
                 .FirstOrDefault(x => x.EmployeeId == model.EmployeeId);
 
@@ -147,7 +147,7 @@ namespace Industry4._0.Controllers
                 return Unauthorized("Authentication details not found");
             }
 
-            
+
             var hasher = new PasswordHasher<AppUser>();
 
             var result = hasher.VerifyHashedPassword(
@@ -161,7 +161,7 @@ namespace Industry4._0.Controllers
                 return Unauthorized("Invalid Employee ID or Password");
             }
 
-            
+
             return Ok(new
             {
                 Message = "Login successful",
@@ -247,6 +247,40 @@ namespace Industry4._0.Controllers
             });
         }
 
+        [HttpDelete]
 
+        public IActionResult DeleteUser(string employeeId)
+        {
+            var user = _context.AppUsers
+                .FirstOrDefault(u => u.EmployeeId == employeeId);
+
+            if (user == null)
+            {
+                return NotFound(new
+                {
+                    Status = false,
+                    Message = "User not found"
+                });
+            }
+
+
+
+
+            _context.AppUsers.Remove(user);
+            _context.SaveChanges();
+
+            return Ok(new
+            {
+                Status = true,
+                Message = "User Deleted successfully",
+                Data = new
+                {
+                    user.EmployeeId,
+                    user.Role,
+                    user.IsActive
+                }
+            });
+
+        }
     }
 }

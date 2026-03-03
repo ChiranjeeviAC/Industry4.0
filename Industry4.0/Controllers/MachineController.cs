@@ -127,7 +127,7 @@ namespace Industry4._0.Controllers
         }
 
         //To Deactivate Machine
-        [HttpPost("DeactivateMachine")]
+        [HttpPut("DeactivateMachine")]
         public IActionResult DeactivateMachine(int id)
         {
             var machine = _context.Machines.Where(m => m.Id == id).FirstOrDefault();
@@ -153,8 +153,29 @@ namespace Industry4._0.Controllers
             });
         }
 
-        
 
+        //To Delete Machine
+        [HttpPost("RemoveMachine")]
+        public IActionResult RemoveMachine(int id)
+        {
+            var machine = _context.Machines.Where(m => m.Id == id).FirstOrDefault();
+            if (machine == null) return BadRequest(new
+            {
+                Status = false,
+                Message = "Machine Not Found."
+            });
+            
+
+
+            _context.Machines.Remove(machine);
+            _context.SaveChanges();
+            return Ok(new
+            {
+                Status = true,
+                Message = "Machine get Deleted.",
+                Data = machine
+            });
+        }
 
 
     }
