@@ -127,8 +127,8 @@ namespace Industry4._0.Controllers
         }
 
         //To Deactivate Machine
-        [HttpPatch("DeactivateMachine")]
-        public IActionResult DeactivateMachine(int id)
+        [HttpPatch("DeactivateOrActivateMachine")]
+        public IActionResult DeactivateMachine(int id, bool isActive)
         {
             var machine = _context.Machines.Where(m => m.Id == id).FirstOrDefault();
             if (machine == null) return BadRequest(new
@@ -136,19 +136,16 @@ namespace Industry4._0.Controllers
                 Status = false,
                 Message = "Machine Not Found."
             });
-            if (!machine.IsActive) return BadRequest(new
-            {
-                Status = false,
-                Message = "Machine already deactivated."
-            });
+            
 
 
-            machine.IsActive = false;
+            machine.IsActive = isActive;
+
             _context.SaveChanges();
             return Ok(new
             {
                 Status = true,
-                Message = "Machine get deactivated.",
+                Message = (isActive == false ? "Machine get deactivated." : "Machine get deactivated"),
                 Data = machine
             });
         }
