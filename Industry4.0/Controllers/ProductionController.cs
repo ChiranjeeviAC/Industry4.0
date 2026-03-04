@@ -148,6 +148,26 @@ namespace Industry4._0.Controllers
             });
         }
 
+        [HttpDelete("ByJobId")]
+        public IActionResult DeleteProduction(string jobId)
+        {
+            var res = _context.ProductionEntries.Where(i => i.JobId == jobId).FirstOrDefault();
+            if (res == null)
+            {
+                return NotFound(new
+                {
+                    Status = false,
+                    Message = $"JobID not found for JobID: {jobId}"
+                });
+            }
+            return Ok(new
+            {
+                Status = true,
+                Message = $"Production Entry deleted of JobID: {jobId}",
+                Data = res
+            });
+        }
+
         
 
 
