@@ -168,8 +168,36 @@ namespace Industry4._0.Controllers
             });
         }
 
-        
 
+        [HttpGet("TotalOKCount")]
+        public IActionResult TotalOKCount()
+        {
+            var totalOk = _context.ProductionEntries.Sum(p => p.OkParts);
+            return Ok(totalOk);
+        }
+
+        [HttpGet("TotalNCCount")]
+        public IActionResult TotalNCCount()
+        {
+            var totalNC = _context.ProductionEntries.Sum(p => p.NcParts);
+            return Ok(totalNC);
+        }
+
+        [HttpGet("TotalOKCountFromMachine")]
+        public IActionResult TotalOKCountFromMachine(int machineId)
+        {
+            var totalOk = _context.ProductionEntries.Where(p => p.MachineId == machineId).ToList();
+            var totalokM = totalOk.Sum(p => p.OkParts);
+            var totalncM = totalOk.Sum(p => p.NcParts);
+            return Ok(new
+            {
+                totalokM,
+                totalncM
+            });
+        }
+
+
+        
 
 
     }
