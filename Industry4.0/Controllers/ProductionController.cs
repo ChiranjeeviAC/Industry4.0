@@ -102,6 +102,52 @@ namespace Industry4._0.Controllers
             });
         }
 
+        [HttpGet("Shift/{ShiftId}")]
+        public IActionResult GetByShift(int shiftId)
+        {
+            var result = _context.ProductionEntries.Where(i => i.ShiftId == shiftId).ToList();
+
+            if (result.Count == 0)
+            {
+                return BadRequest(new
+                {
+                    Status = false,
+                    Message = $"No Production entry at Shift fount of ShiftId: {shiftId}"
+                });
+            }
+
+            return Ok(new
+            {
+                Status = true,
+                Message = $" Production entry at Shift of ShiftId: {shiftId}",
+                Data = result
+            });
+        }
+
+
+
+        [HttpGet("GetByProductId/{PrudID}")]
+        public IActionResult GetByProductId(int PrudID)
+        {
+            var result = _context.ProductionEntries.Where(i => i.Id == PrudID).FirstOrDefault();
+
+            if (result == null)
+            {
+                return BadRequest(new
+                {
+                    Status = false,
+                    Message = $"No Production entry at Shift fount of ShiftId: {PrudID}"
+                });
+            }
+
+            return Ok(new
+            {
+                Status = true,
+                Message = $" Production entry at Shift of ShiftId: {PrudID}",
+                Data = result
+            });
+        }
+
         
 
 
