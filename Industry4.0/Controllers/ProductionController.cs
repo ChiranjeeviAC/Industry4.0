@@ -196,8 +196,24 @@ namespace Industry4._0.Controllers
             });
         }
 
+        [HttpGet("TotalOkNcCountFromMachineFromTodate")]
+        public IActionResult TotalOKCountFromMachinedate(int machineId, DateTime from, DateTime to)
+        {
+            var production = _context.ProductionEntries
+        .Where(p => p.MachineId == machineId
+        && p.EntryTime >= from
+        && p.EntryTime <= to)
+        .ToList();
 
-        
+            var totalokM = production.Sum(p => p.OkParts);
+            var totalncM = production.Sum(p => p.NcParts);
+            return Ok(new
+            {
+                totalokM,
+                totalncM
+            });
+        }
+
 
 
     }
