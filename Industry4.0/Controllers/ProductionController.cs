@@ -267,7 +267,7 @@ namespace Industry4._0.Controllers
         {
             var result = (
         from p in _context.ProductionEntries
-        join u in _context.AppUsers on p.MachineId equals u.Id
+        join u in _context.AppUsers on p.UserId equals u.Id
         group p by new
         {
             u.EmployeeId
