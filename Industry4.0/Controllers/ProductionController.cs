@@ -346,7 +346,29 @@ namespace Industry4._0.Controllers
             });
         }
 
-        
+        [HttpGet("daily?date=YYYY-MM-DD")]
+        public IActionResult TotalOKCountSpecificMachinedate(int machineId, DateTime date)
+        {
+
+
+            var production = _context.ProductionEntries
+        .Where(p => p.MachineId == machineId
+        && p.EntryTime == date)
+        .FirstOrDefault();
+
+            if (production == null)
+            {
+                return NoContent();
+            }
+            return Ok(new
+            {
+                machine = machineId,
+                Date = date,
+                TotalOkParts = production.OkParts,
+                TotalNcParts = production.NcParts,
+                TotalProduction = production.OkParts + production.NcParts
+            });
+        }
 
 
 
