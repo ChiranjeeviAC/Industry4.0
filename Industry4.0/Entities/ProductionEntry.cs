@@ -13,5 +13,6 @@ namespace Industry4._0.Entities
         public int OkParts { get; set; }
         public int NcParts { get; set; }
         public DateTime EntryTime { get; set; }
+        
     }
 }

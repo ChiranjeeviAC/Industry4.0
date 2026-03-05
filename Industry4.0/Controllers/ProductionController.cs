@@ -226,7 +226,7 @@ namespace Industry4._0.Controllers
             });
         }
 
-        [HttpGet("TotalOKNcCountofAllMachine")]
+        [HttpGet("machine-summary")]
         public IActionResult TotalOKNcCountofAllMachine()
         {
             var result = (
@@ -262,7 +262,7 @@ namespace Industry4._0.Controllers
 
 
 
-        [HttpGet("TotalOKNcCountofAllUser")]
+        [HttpGet("operator-performance")]
         public IActionResult TotalOKNcCountofAllUser()
         {
             var result = (
@@ -276,10 +276,11 @@ namespace Industry4._0.Controllers
         into g
         select new
         {
-            Machine = g.Key.EmployeeId,
+            EmployeeId = g.Key.EmployeeId,
             TotalOKParts = g.Sum(x => x.OkParts),
             TotalNCParts = g.Sum(x => x.NcParts),
-            TotalParts = g.Sum(x => x.OkParts + x.NcParts)
+            TotalParts = g.Sum(x => x.OkParts + x.NcParts),
+            Performance = (g.Sum(x => x.OkParts) /(double)g.Sum(x => x.OkParts + x.NcParts)) * 100
         }).ToList();
 
 
@@ -297,28 +298,42 @@ namespace Industry4._0.Controllers
         }
 
 
-        [HttpGet("TotalOKNcCountofAllShift")]
-        public IActionResult TotalOKNcCountofAllShift()
+        [HttpGet("shift-report/{shiftId}")]
+        public IActionResult TotalOKNcCountofAllShift( int shiftId )
         {
             var result = (
         from p in _context.ProductionEntries
+        join m in _context.Machines on p.MachineId equals m.Id
+        join u in _context.AppUsers on p.UserId equals u.Id
         join s in _context.Shifts on p.ShiftId equals s.Id
+        
+
+
         group p by new
         {
-            s.ShiftName
+            p.ShiftId,
+            s.ShiftName,
+            m.MachineName,
+            u.EmployeeId
 
         }
         into g
         select new
         {
-            Machine = g.Key.ShiftName,
+            ShiftId = g.Key.ShiftId,
+            Shift = g.Key.ShiftName,
+            Machine = g.Key.MachineName,
+            EmployeeID = g.Key.EmployeeId,
+
             TotalOKParts = g.Sum(x => x.OkParts),
             TotalNCParts = g.Sum(x => x.NcParts),
-            TotalParts = g.Sum(x => x.OkParts + x.NcParts)
+            TotalParts = g.Sum(x => x.OkParts + x.NcParts),
+            Performance = (g.Sum(x => x.OkParts) / (double)g.Sum(x => x.OkParts + x.NcParts)) * 100
         }).ToList();
+            var ans = result.FirstOrDefault(i => i.ShiftId == shiftId);
 
 
-            if (result.Count == 0)
+            if (ans == null)
             {
                 return NoContent();
             }
@@ -331,6 +346,7 @@ namespace Industry4._0.Controllers
             });
         }
 
+        
 
 
 
