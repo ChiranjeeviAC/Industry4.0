@@ -390,6 +390,39 @@ namespace Industry4._0.Controllers
         }
 
 
+        [HttpGet("top-machine")]
+        public IActionResult TopMachine()
+        {
+            var result = (
+                from p in _context.ProductionEntries
+                join m in _context.Machines on p.MachineId equals m.Id
+                group p by new
+                {
+                    m.MachineName
+                }
+                into g
+                select new
+                {
+                    Machine = g.Key.MachineName,
+                    TotalProduction = g.Sum(x => x.OkParts + x.NcParts)
+                }
+            )
+            .OrderByDescending(x => x.TotalProduction)
+            .FirstOrDefault();
+
+            if (result == null)
+            {
+                return NoContent();
+            }
+
+            return Ok(new
+            {
+                Status = true,
+                Message = "Top performing machine",
+                Data = result
+            });
+        }
+
 
 
     }
