@@ -364,6 +364,31 @@ namespace Industry4._0.Controllers
             });
         }
 
+        [HttpGet("daily{machineId}")]
+        public IActionResult dailyMachimeSummary(int machineId, DateTime date)
+        {
+            var start = date.Date;
+            var end = start.AddDays(1);
+
+            var production = _context.ProductionEntries
+        .Where(p => p.MachineId == machineId && p.EntryTime >= start && p.EntryTime < end)
+        .ToList();
+
+            if (production == null)
+            {
+                return NoContent();
+            }
+
+            return Ok(new
+            {
+                MachineId = machineId,
+                Date = date,
+                TotalOkParts = production.Sum(p => p.OkParts),
+                TotalNcParts = production.Sum(p => p.NcParts),
+                TotalProduction = production.Sum(p => p.OkParts) + production.Sum(p => p.NcParts)
+            });
+        }
+
 
 
 
