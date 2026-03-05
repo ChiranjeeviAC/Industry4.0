@@ -173,14 +173,20 @@ namespace Industry4._0.Controllers
         public IActionResult TotalOKCount()
         {
             var totalOk = _context.ProductionEntries.Sum(p => p.OkParts);
-            return Ok(totalOk);
+            return Ok(new
+            {
+                TotalOkCount = totalOk
+            });
         }
 
         [HttpGet("TotalNCCount")]
         public IActionResult TotalNCCount()
         {
             var totalNC = _context.ProductionEntries.Sum(p => p.NcParts);
-            return Ok(totalNC);
+            return Ok(new
+            {
+                TotalOkCount = totalNC
+            });
         }
 
         [HttpGet("TotalOKCountFromMachine")]
@@ -191,8 +197,10 @@ namespace Industry4._0.Controllers
             var totalncM = totalOk.Sum(p => p.NcParts);
             return Ok(new
             {
-                totalokM,
-                totalncM
+                machine = machineId,
+                TotalOkParts = totalokM,
+                TotalNcParts = totalncM,
+                TotalProduction = totalokM + totalncM
             });
         }
 
@@ -209,10 +217,121 @@ namespace Industry4._0.Controllers
             var totalncM = production.Sum(p => p.NcParts);
             return Ok(new
             {
-                totalokM,
-                totalncM
+                machine = machineId,
+                fromDate = from,
+                toDate = to,
+                TotalOkParts = totalokM,
+                TotalNcParts = totalncM,
+                TotalProduction = totalokM + totalncM
             });
         }
+
+        [HttpGet("TotalOKNcCountofAllMachine")]
+        public IActionResult TotalOKNcCountofAllMachine()
+        {
+            var result = (
+        from p in _context.ProductionEntries
+        join m in _context.Machines on p.MachineId equals m.Id
+        group p by new
+        {
+            m.MachineCode,
+            m.MachineName
+        }
+        into g
+        select new
+        {
+            MachineCode = g.Key.MachineCode,
+            MachineName = g.Key.MachineName,
+            TotalOKParts = g.Sum(x => x.OkParts),
+            TotalNCParts = g.Sum(x => x.NcParts),
+            TotalParts = g.Sum(x => x.OkParts + x.NcParts)
+        }).ToList();
+
+            if (result.Count == 0)
+            {
+                return NoContent();
+            }
+
+            return Ok(new 
+            {
+                Status = true,
+                Message = "Details of Production According to Machine",
+                Data = result
+            });
+        }
+
+
+
+        [HttpGet("TotalOKNcCountofAllUser")]
+        public IActionResult TotalOKNcCountofAllUser()
+        {
+            var result = (
+        from p in _context.ProductionEntries
+        join u in _context.AppUsers on p.MachineId equals u.Id
+        group p by new
+        {
+            u.EmployeeId
+           
+        }
+        into g
+        select new
+        {
+            Machine = g.Key.EmployeeId,
+            TotalOKParts = g.Sum(x => x.OkParts),
+            TotalNCParts = g.Sum(x => x.NcParts),
+            TotalParts = g.Sum(x => x.OkParts + x.NcParts)
+        }).ToList();
+
+
+            if (result.Count == 0)
+            {
+                return NoContent();
+            }
+
+            return Ok(new
+            {
+                Status = true,
+                Message = "Details of Production According to User",
+                Data = result
+            });
+        }
+
+
+        [HttpGet("TotalOKNcCountofAllShift")]
+        public IActionResult TotalOKNcCountofAllShift()
+        {
+            var result = (
+        from p in _context.ProductionEntries
+        join s in _context.Shifts on p.ShiftId equals s.Id
+        group p by new
+        {
+            s.ShiftName
+
+        }
+        into g
+        select new
+        {
+            Machine = g.Key.ShiftName,
+            TotalOKParts = g.Sum(x => x.OkParts),
+            TotalNCParts = g.Sum(x => x.NcParts),
+            TotalParts = g.Sum(x => x.OkParts + x.NcParts)
+        }).ToList();
+
+
+            if (result.Count == 0)
+            {
+                return NoContent();
+            }
+
+            return Ok(new
+            {
+                Status = true,
+                Message = "Details of Production According to Shift",
+                Data = result
+            });
+        }
+
+
 
 
 
