@@ -227,7 +227,7 @@ namespace Industry4._0.Controllers
         }
 
         [HttpGet("machine-summary")]
-        public IActionResult TotalOKNcCountofAllMachine()
+        public IActionResult machinesummary()
         {
             var result = (
         from p in _context.ProductionEntries
@@ -263,7 +263,7 @@ namespace Industry4._0.Controllers
 
 
         [HttpGet("operator-performance")]
-        public IActionResult TotalOKNcCountofAllUser()
+        public IActionResult operatorperformance()
         {
             var result = (
         from p in _context.ProductionEntries
@@ -299,44 +299,37 @@ namespace Industry4._0.Controllers
 
 
         [HttpGet("shift-report/{shiftId}")]
-        public IActionResult TotalOKNcCountofAllShift( int shiftId )
+        public IActionResult ShiftReport(int shiftId)
         {
             var result = (
-        from p in _context.ProductionEntries
-        join m in _context.Machines on p.MachineId equals m.Id
-        join u in _context.AppUsers on p.UserId equals u.Id
-        join s in _context.Shifts on p.ShiftId equals s.Id
-        
+                from p in _context.ProductionEntries
+                join m in _context.Machines on p.MachineId equals m.Id
+                join u in _context.AppUsers on p.UserId equals u.Id
+                join s in _context.Shifts on p.ShiftId equals s.Id
+                where p.ShiftId == shiftId
+                group p by new
+                {
+                    p.ShiftId,
+                    s.ShiftName,
+                    m.MachineName,
+                    u.EmployeeId
+                }
+                into g
+                select new
+                {
+                    ShiftId = g.Key.ShiftId,
+                    Shift = g.Key.ShiftName,
+                    Machine = g.Key.MachineName,
+                    EmployeeID = g.Key.EmployeeId,
+                    TotalOKParts = g.Sum(x => x.OkParts),
+                    TotalNCParts = g.Sum(x => x.NcParts),
+                    TotalParts = g.Sum(x => x.OkParts + x.NcParts),
+                    Performance = (g.Sum(x => x.OkParts) /
+                                  (double)g.Sum(x => x.OkParts + x.NcParts)) * 100
+                }).ToList();
 
-
-        group p by new
-        {
-            p.ShiftId,
-            s.ShiftName,
-            m.MachineName,
-            u.EmployeeId
-
-        }
-        into g
-        select new
-        {
-            ShiftId = g.Key.ShiftId,
-            Shift = g.Key.ShiftName,
-            Machine = g.Key.MachineName,
-            EmployeeID = g.Key.EmployeeId,
-
-            TotalOKParts = g.Sum(x => x.OkParts),
-            TotalNCParts = g.Sum(x => x.NcParts),
-            TotalParts = g.Sum(x => x.OkParts + x.NcParts),
-            Performance = (g.Sum(x => x.OkParts) / (double)g.Sum(x => x.OkParts + x.NcParts)) * 100
-        }).ToList();
-            var ans = result.FirstOrDefault(i => i.ShiftId == shiftId);
-
-
-            if (ans == null)
-            {
+            if (!result.Any())
                 return NoContent();
-            }
 
             return Ok(new
             {
@@ -346,27 +339,28 @@ namespace Industry4._0.Controllers
             });
         }
 
-        [HttpGet("daily?date=YYYY-MM-DD")]
-        public IActionResult TotalOKCountSpecificMachinedate(int machineId, DateTime date)
+        [HttpGet("daily")]
+        public IActionResult daily( DateTime date)
         {
-
+            var start = date.Date;
+            var end = start.AddDays(1);
 
             var production = _context.ProductionEntries
-        .Where(p => p.MachineId == machineId
-        && p.EntryTime == date)
-        .FirstOrDefault();
+        .Where(p => p.EntryTime >= start && p.EntryTime < end)
+        .ToList();
 
             if (production == null)
             {
                 return NoContent();
             }
+            
             return Ok(new
             {
-                machine = machineId,
+                
                 Date = date,
-                TotalOkParts = production.OkParts,
-                TotalNcParts = production.NcParts,
-                TotalProduction = production.OkParts + production.NcParts
+                TotalOkParts = production.Sum(p => p.OkParts),
+                TotalNcParts = production.Sum(p => p.NcParts),
+                TotalProduction = production.Sum(p => p.OkParts) + production.Sum(p => p.NcParts)
             });
         }
 
