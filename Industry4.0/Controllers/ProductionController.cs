@@ -461,6 +461,85 @@ namespace Industry4._0.Controllers
 
 
 
+        [HttpPost("MachineUser")]
+        public IActionResult MachineUser(MachineUser dto)
+        {
+            var result = (
+                from p in _context.ProductionEntries
+                join m in _context.Machines on p.MachineId equals m.Id
+                join u in _context.AppUsers on p.UserId equals u.Id
+                where m.Id == dto.mId
+                group p by new
+                {
+                    u.Id
+                }
+                into g
+                select new
+                {
+
+                    OperatorID = g.Key.Id
+
+                }
+                ).ToList();
+
+
+            var result1 = (
+                from p in _context.ProductionEntries
+                join m in _context.Machines on p.MachineId equals m.Id
+                join u in _context.AppUsers on p.UserId equals u.Id
+                where m.Id == dto.mId && u.Id == dto.uId
+
+
+                select new
+                {
+
+                    OperatorID = u.Id,
+                    OperatorEID = u.EmployeeId,
+                    OperatorRole = u.Role,
+                    OperatorStatus = u.IsActive
+                }
+                ).FirstOrDefault();
+
+
+            if (result1 != null)
+            {
+                return Ok(new
+                {
+                    Status = true,
+                    Message = "Operstor Details feched successfully",
+                    Data = result1
+                });
+            }
+
+
+            if (dto.uId > 0 && result1 == null)
+            {
+                return BadRequest(new
+                {
+                    Status = false,
+                    Message = $"Operator with operatorId: {dto.uId} Not found for Machine with machineId: {dto.mId} ",
+
+                });
+            }
+
+
+
+            if (result.Count == 0)
+            {
+                return BadRequest(new
+                {
+                    Status = false,
+                    Message = "Machine Not found"
+                });
+            }
+
+            return Ok(new
+            {
+                Status = true,
+                Message = $"Number of Operators work for Machine of machineID: {dto.mId} are {result.Count}",
+                Data = result
+            });
+        }
 
 
     }
