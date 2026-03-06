@@ -441,8 +441,7 @@ namespace Industry4._0.Controllers
             {
                 return NotFound();
             }
-            var totalokM = production.Sum(p => p.OkParts);
-            var totalncM = production.Sum(p => p.NcParts);
+            
             return Ok(new
             {
                 Status = true,
@@ -453,9 +452,9 @@ namespace Industry4._0.Controllers
                     user = dto.Uid,
                     fromDate = dto.from,
                     toDate = dto.to,
-                    TotalOkParts = totalokM,
-                    TotalNcParts = totalncM,
-                    TotalProduction = totalokM + totalncM
+                    TotalOkParts = production.Sum(p => p.OkParts),
+                    TotalNcParts = production.Sum(p => p.NcParts),
+                    TotalProduction = production.Sum(p => p.OkParts) + production.Sum(p => p.NcParts)
                 }
             });
         }
