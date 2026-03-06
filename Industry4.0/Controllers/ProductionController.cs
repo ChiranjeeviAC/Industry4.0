@@ -426,8 +426,8 @@ namespace Industry4._0.Controllers
 
 
 
-        [HttpPost("Production-by-Machine-User")]
-        public IActionResult ProductionbyMachineUser(GetMachineandUserProduction dto)
+        [HttpPost("Production-by-Machine-User-PerCycle")]
+        public IActionResult ProductionbyMachineUserPerCycle(GetMachineandUserProduction dto)
         {
            
 
@@ -460,7 +460,8 @@ namespace Industry4._0.Controllers
         }
 
 
-        
+
+
 
     }
 }
