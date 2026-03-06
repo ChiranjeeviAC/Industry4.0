@@ -233,7 +233,41 @@ namespace Industry4._0.Controllers
             });
         }
 
-        
+        [HttpPatch("ResetPassward")]
+        public IActionResult ResetPassward(ResetPassward dto)
+        {
+            var user = _context.UserAuthDelails.FirstOrDefault(u => u.EmployeeId == dto.EmployeeId);
+
+            var hasher = new PasswordHasher<UserAuthDelails>();
+
+            var result = hasher.VerifyHashedPassword(
+                user,
+                user.Password,
+                dto.oldPassward
+            );
+
+            if (result == PasswordVerificationResult.Failed)
+            {
+                return Unauthorized(new
+                {
+                    Status = false,
+                    Message = "Invalid Employee ID or old Password"
+                });
+            }
+
+            user.Password = hasher.HashPassword(user, dto.newPassward);
+            _context.SaveChanges();
+
+            return Ok(new
+            {
+                Status = true,
+                Message = "Password changed successfully"
+            });
+
+        }
+
+
+
 
         [HttpDelete]
 
