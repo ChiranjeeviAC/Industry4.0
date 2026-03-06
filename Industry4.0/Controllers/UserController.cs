@@ -267,6 +267,37 @@ namespace Industry4._0.Controllers
         }
 
 
+        [HttpPatch("ForgetPassward")]
+        public IActionResult ForgetPassward(ForgetPassward dto)
+        {
+            var user = _context.UserAuthDelails.FirstOrDefault(u => u.EmployeeId == dto.EmployeeId);
+
+            string key = "*#@#";
+            var hasher = new PasswordHasher<UserAuthDelails>();
+
+            var result = (key != dto.key);
+
+            if (result)
+            {
+                return Unauthorized(new
+                {
+                    Status = false,
+                    Message = "Invalid key entered"
+                });
+            }
+
+            user.Password = hasher.HashPassword(user, dto.newPassward);
+            _context.SaveChanges();
+
+            return Ok(new
+            {
+                Status = true,
+                Message = "Password changed successfully"
+            });
+
+        }
+
+
 
 
         [HttpDelete]
