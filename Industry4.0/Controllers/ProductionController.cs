@@ -3,6 +3,7 @@ using Industry4._0.Entities;
 using Industry4._0.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using System.Reflection.PortableExecutable;
 
 namespace Industry4._0.Controllers
 {
@@ -423,6 +424,43 @@ namespace Industry4._0.Controllers
             });
         }
 
+
+
+        [HttpPost("Production-by-Machine-User")]
+        public IActionResult ProductionbyMachineUser(GetMachineandUserProduction dto)
+        {
+           
+
+            var production = _context.ProductionEntries
+            .Where(p => p.MachineId == dto.Mid && p.UserId == dto.Uid
+            && p.EntryTime >= dto.from
+            && p.EntryTime <= dto.to)
+            .ToList();
+
+            if (production.Count == 0)
+            {
+                return NotFound();
+            }
+            var totalokM = production.Sum(p => p.OkParts);
+            var totalncM = production.Sum(p => p.NcParts);
+            return Ok(new
+            {
+                Status = true,
+                Message = "Data fetch Secussfully",
+                Data = new
+                {
+                    machine = dto.Mid,
+                    user = dto.Uid,
+                    fromDate = dto.from,
+                    toDate = dto.to,
+                    TotalOkParts = totalokM,
+                    TotalNcParts = totalncM,
+                    TotalProduction = totalokM + totalncM
+                }
+            });
+        }
+
+          
 
 
     }
