@@ -174,6 +174,140 @@ namespace Industry4._0.Controllers
 
 
 
+        [HttpGet("AddMachinecopy")]
+        public IActionResult AddMachinecopy( string MachineCode, string MachineName, bool IsActive)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var existing = _context.Machines
+                .FirstOrDefault(m => m.MachineCode == MachineCode);
+
+            if (existing != null)
+            {
+                return BadRequest(new
+                {
+                    Status = false,
+                    Message = "Machine code already exists"
+                });
+            }
+
+            var machine = new Machine
+            {
+                MachineCode = MachineCode,
+                MachineName = MachineName,
+                IsActive = IsActive
+            };
+
+            _context.Machines.Add(machine);
+            _context.SaveChanges();
+
+            return CreatedAtAction(
+                nameof(GetMachineById),
+                new { id = machine.Id },
+                new
+                {
+                    Status = true,
+                    Message = "Machine added successfully",
+                    Data = machine
+                });
+        }
+
+
+       
+        [HttpPost("RemoveMachineopy")]
+        public IActionResult RemoveMachineopy( DeleteMachine dto)
+        {
+            var machine = _context.Machines.Where(m => m.Id == dto.Id).FirstOrDefault();
+            if (machine == null) return BadRequest(new
+            {
+                Status = false,
+                Message = "Machine Not Found."
+            });
+
+            _context.Machines.Remove(machine);
+            _context.SaveChanges();
+            return Ok(new
+            {
+                Status = true,
+                Message = "Machine get Deleted.",
+                Data = machine
+            });
+        }
+
+
+
+
+        [HttpDelete("GetAllActiveMachine1")]
+        public IActionResult GetAllActiveMachine1()
+        {
+            var machines = _context.Machines
+                .Where(i => i.IsActive)
+                .Select(i => new
+                {
+                    i.Id,
+                    i.MachineCode,
+                    i.MachineName,
+
+                }).ToList();
+
+            if (machines.Count == 0)
+            {
+                return NotFound(
+                    new
+                    {
+                        Status = false,
+                        Message = "No Active Machine found"
+                    });
+            }
+            return Ok(new
+            {
+                Status = true,
+                Message = $"Number of Active Machine are {machines.Count}",
+                Data = machines
+            });
+        }
+
+
+        [HttpDelete("AddMachine1")]
+        public IActionResult AddMachine1(MachineCreateDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var existing = _context.Machines
+                .FirstOrDefault(m => m.MachineCode == dto.MachineCode);
+
+            if (existing != null)
+            {
+                return BadRequest(new
+                {
+                    Status = false,
+                    Message = "Machine code already exists"
+                });
+            }
+
+            var machine = new Machine
+            {
+                MachineCode = dto.MachineCode,
+                MachineName = dto.MachineName,
+                IsActive = dto.IsActive
+            };
+
+            _context.Machines.Add(machine);
+            _context.SaveChanges();
+
+            return CreatedAtAction(
+                nameof(GetMachineById),
+                new { id = machine.Id },
+                new
+                {
+                    Status = true,
+                    Message = "Machine added successfully",
+                    Data = machine
+                });
+        }
+
 
     }
 
