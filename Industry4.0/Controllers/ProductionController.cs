@@ -263,6 +263,8 @@ namespace Industry4._0.Controllers
 
 
 
+
+
         [HttpGet("operator-performance")]
         public IActionResult operatorperformance()
         {
@@ -294,6 +296,44 @@ namespace Industry4._0.Controllers
             {
                 Status = true,
                 Message = "Details of Production According to User",
+                Data = result
+            });
+        }
+
+
+
+
+        [HttpGet("Top-operator-performance")]
+        public IActionResult topOperatorPerformance()
+        {
+            var result = (
+        from p in _context.ProductionEntries
+        join u in _context.AppUsers on p.UserId equals u.Id
+        group p by new
+        {
+            u.EmployeeId
+
+        }
+        into g
+        select new
+        {
+            EmployeeId = g.Key.EmployeeId,
+            TotalOKParts = g.Sum(x => x.OkParts),
+            TotalNCParts = g.Sum(x => x.NcParts),
+            TotalParts = g.Sum(x => x.OkParts + x.NcParts),
+            Performance = (g.Sum(x => x.OkParts) / (double)g.Sum(x => x.OkParts + x.NcParts)) * 100
+        }).OrderByDescending(m => m.TotalOKParts).First();
+
+
+            if (result == null)
+            {
+                return NoContent();
+            }
+
+            return Ok(new
+            {
+                Status = true,
+                Message = "Top Operator performance Details",
                 Data = result
             });
         }
@@ -540,6 +580,8 @@ namespace Industry4._0.Controllers
                 Data = result
             });
         }
+
+
 
 
     }
