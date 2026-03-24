@@ -117,5 +117,26 @@ namespace Industry4._0.Controllers
                 Data = shifts
             });
         }
+
+        [HttpDelete]
+        public IActionResult DeleteShift(int id) { 
+            var shift = _context.Shifts.Where(s => s.Id == id).FirstOrDefault();
+            if (shift == null)
+            {
+                return BadRequest(new
+                {
+                    Status = false,
+                    Message = $"Shift not for id{id}" 
+                });
+            }
+            _context.Shifts.Remove(shift);
+            _context.SaveChanges();
+            return Ok(new
+            {
+                Status = true,
+                Message = "Shift deleted secussfully",
+                Data = shift
+            });
+        }
     }
 }
