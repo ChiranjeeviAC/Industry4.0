@@ -138,5 +138,30 @@ namespace Industry4._0.Controllers
                 Data = shift
             });
         }
+
+
+        [HttpPut]
+        public IActionResult UpdateShift(UpdateShift dto)
+        {
+            var shift = _context.Shifts.Where(s => s.Id == dto.Id).FirstOrDefault();
+            if (shift == null)
+            {
+                return BadRequest(new
+                {
+                    Status = false,
+                    Message = $"Shift not for id{dto.Id}"
+                });
+            }
+            shift.ShiftName = dto.ShiftName;
+            shift.StartTime = dto.StartTime;
+            shift.EndTime = dto.EndTime;
+            _context.SaveChanges();
+            return Ok(new
+            {
+                Status = true,
+                Message = "Shift Updated secussfully",
+                Data = shift
+            });
+        }
     }
 }
