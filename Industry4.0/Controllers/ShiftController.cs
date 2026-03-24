@@ -163,5 +163,28 @@ namespace Industry4._0.Controllers
                 Data = shift
             });
         }
+        [HttpPatch]
+        public IActionResult UpdateShiftStartTime(UpdateShiftStartTime dto)
+        {
+            var shift = _context.Shifts.Where(s => s.Id == dto.Id).FirstOrDefault();
+            if (shift == null)
+            {
+                return BadRequest(new
+                {
+                    Status = false,
+                    Message = $"Shift not for id{dto.Id}"
+                });
+            }
+            
+            shift.StartTime = dto.StartTime;
+            
+            _context.SaveChanges();
+            return Ok(new
+            {
+                Status = true,
+                Message = "Shift start time Updated secussfully",
+                Data = shift
+            });
+        }
     }
 }
