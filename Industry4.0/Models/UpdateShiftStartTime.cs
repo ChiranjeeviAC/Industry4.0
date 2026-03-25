@@ -6,4 +6,11 @@
         
         public TimeSpan StartTime { get; set; }
     }
+
+    public class UpdateShiftNameDto
+    {
+        public int Id { get; set; }
+
+        public string ShiftName { get; set; }
+    }
 }
