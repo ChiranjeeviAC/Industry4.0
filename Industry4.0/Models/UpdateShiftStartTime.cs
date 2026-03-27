@@ -6,6 +6,12 @@
         
         public TimeSpan StartTime { get; set; }
     }
+    public class UpdateShiftEndTime
+    {
+        public int Id { get; set; }
+
+        public TimeSpan EndTime { get; set; }
+    }
 
     public class UpdateShiftNameDto
     {
