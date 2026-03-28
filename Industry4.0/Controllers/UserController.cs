@@ -171,7 +171,32 @@ namespace Industry4._0.Controllers
         }
 
 
+        [HttpGet("GetUserByRole")]
+        public IActionResult GetUserByRole(string role) {
+            var user = _context.AppUsers
+                .Where(x => x.Role == role)
+                .Select(m => new
+                {
+                    m.Id,
+                    m.EmployeeId,
+                    m.Role,
+                    m.IsActive
+                }).ToList();
+            if (user == null) {
+                BadRequest(new
+                {
+                    Status = false,
+                    Message = $"Users not found for rolr {role}"
+                });
+            }
 
+            return Ok(new
+            {
+                Status = true,
+                Message = $"Users Featched Secussfully of role {role}",
+                Data = user
+            });
+        }
 
 
         [HttpGet("active")]
