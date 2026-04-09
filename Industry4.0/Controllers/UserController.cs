@@ -37,6 +37,20 @@ namespace Industry4._0.Controllers
             return Ok(users);
         }
 
+        [HttpGet("GetNoOfUsers")]
+        public IActionResult GetNoOfUsers()
+        {
+            var users = _context.AppUsers.ToList();
+            var ans = users.Count();
+
+            return Ok(new
+            {
+                Status = true,
+                Message = "Fetched total number of users.",
+                Data = ans
+            }); 
+        }
+
         //  GET USER BY EMPLOYEE ID
         [HttpGet("{employeeId}")]
         public IActionResult Get(string employeeId)
